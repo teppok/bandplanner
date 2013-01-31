@@ -1,7 +1,7 @@
 import os
 import sys
 
-path = '/home/teppo/django'
+path = '/path-to-django-root'
 if path not in sys.path:
     sys.path.append(path)
     
