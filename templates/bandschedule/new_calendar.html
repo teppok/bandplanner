@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+		<title>Band scheduler</title>
+		<meta name="description" content="" />
+		<meta name="author" content="Teppo Kankaanpää" />
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	</head>
+
+	<body>
+		<div>
+			<header>
+				<h1>Band scheduler</h1>
+			</header>
+			<h2>Create a new calendar</h2>
+			<div>
+				A short help:<br>
+				
+				<P>This software addresses a very specific kind of scheduling problem:
+				Take a band with a relatively small amount of members. This band wants to
+				schedule a gig some time in the near or far future, but some of the members
+				may have restrictions on days that are acceptable. Most days they are able
+				to move their other arrangements.</P>
+				
+				<P>Using this little calendar, band members can let others know which days
+					are bad for them, maybe a month or two into the future, so if a possible
+					date for a gig is offered, it can be accepted without asking each separate
+					member for a confirmation.</P>
+					
+				<P>Create a calendar with any descriptive string.
+					Copy the url of the calendar you receive to a safe location -- if you lose the url, you lose the calendar.
+					You should share the url to other users.
+					Then type in your username and click on the days to turn them red. When you're quite
+					sure you have finished a month, click on the checkbox to let others know that this
+					month is good to go.</P>
+				
+				<P>When arranging the gig, open the calendar. From the list at the bottom you'll see 
+					if all members have finished filling out the
+					month (so you can be sure that this information is valid and complete), 
+					and you see the days where some member can't make it as yellow.</P>
+				
+			</div>
+			<div>
+				<form action="{% url create_calendar %}" method="post">{% csrf_token %}
+					Calendar description: <input type="text" name="descstring" />
+					<input type="submit" value="Create calendar" />
+				</form>
+			</div>
+			<div>
+				Note that the program might be a little slow at times, because of a slow network connection.
+			</div>
+
+			<footer>
+				<p>
+					&copy; Copyright 2012-2013 by Teppo Kankaanpää
+				</p>
+			</footer>
+		</div>
+        <script>
+            var _gaq=[['_setAccount','UA-37644492-1'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+	</body>
+</html>

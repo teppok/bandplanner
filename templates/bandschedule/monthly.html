@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+		<title>Month view</title>
+		<meta name="description" content="" />
+		<meta name="author" content="Teppo Kankaanpää" />
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
+
+		<script>
+			var user = "";
+		
+			$(document).ready(function() {
+				changeUser("{{ user }}", false);
+			});
+			
+			function toggle(year, month, day) {
+				if (user != "") {
+					var geturl = "{% url toggle_date %}?year={{ year }}&month={{ month }}" + "&targetyear=" + year + "&targetmonth=" + month + "&targetday=" + day + "&calendar_id={{ calendar_id }}";
+					//document.myForm.debug.value = geturl;
+					$.ajax({
+			//			async: false,
+						cache: false,
+						dataType : 'json',
+						type : 'GET',
+						url : geturl,
+						success : function(data) {
+							updateMonthAll(data.month);
+						}
+					});
+				}					
+			}
+
+			function thisMonthSeen() {
+				if (user != "") {
+					var toggle;
+					if (document.mainform.month_seen.checked) {
+						toggle = 1;
+					} else {
+						toggle = 0;
+					}
+					var geturl = "{% url approve_month_request %}?year={{ year }}&month={{ month }}&calendar_id={{ calendar_id }}&yesno="+toggle;
+					//document.myForm.debug.value = geturl;
+					$.ajax({
+			//			async: false,
+						cache: false,
+						dataType : 'json',
+						type : 'GET',
+						url : geturl,
+						success : function(data) {
+							$("#monthseendata").html(data.month_seen_by);
+						}
+					});
+				}					
+			}
+
+			function changeUser(newUser, getmonth) {
+//				user = document.userform.user.value;
+				user = newUser;
+				if (user == "") {
+					$("#userformloc").css("display", "block");
+					$("#usernameloc").css("display", "none");
+					$("#monthseenform").css("display", "none");
+					
+				} else {
+					$("#username").html(user);
+					$("#userformloc").css("display", "none");
+					$("#usernameloc").css("display", "block");
+					$("#monthseenform").css("display", "block");
+					
+				}
+				if (getmonth) {
+					getMonth();
+				}
+			}
+
+			function loginUser() {
+				var newuser = document.userform.user.value;
+				var geturl = "{% url login_user %}?user=" + newuser + "&calendar_id={{ calendar_id }}";
+				//document.myForm.debug.value = geturl;
+				$.ajax({
+		//			async: false,
+					cache: false,
+					dataType : 'text',
+					type : 'GET',
+					url : geturl,
+					success : function(data) {
+						changeUser(newuser, true);
+					}
+				});
+			}
+
+			function logoutUser() {
+//				var newuser = document.userform.user.value;
+				var geturl = "{% url logout_user %}?calendar_id={{ calendar_id }}";
+				$.ajax({
+					cache: false,
+					dataType : 'text',
+					type : 'GET',
+					url : geturl,
+					success : function(data) {
+						changeUser("", true);
+					}
+				});
+			}
+
+			function getMonth() {
+//				var user = document.userform.user.value;
+				var geturl = "{% url get_month %}?year={{ year }}&month={{ month }}&calendar_id={{ calendar_id }}";
+				//document.myForm.debug.value = geturl;
+				$.ajax({
+		//			async: false,
+					cache: false,
+					dataType : 'json',
+					type : 'GET',
+					url : geturl,
+					success : function(data) {
+						updateMonthAll(data.month);
+						updateMonthSeen(data.month_seen);
+					}
+				});
+					
+			}
+			
+			function updateMonthAll(data) {
+				$("#monthdata").html(data);
+			}
+
+			function updateMonthSeen(data) {
+				document.mainform.month_seen.checked = data;
+			}
+
+		</script>
+		<style>
+			.tablecell {
+				width: 30px; 
+				height: 30px;
+			}
+			.green {
+				background-color: #30BB30;
+			}
+			.red {
+				background-color: red;
+			}
+			.yellow {
+				background-color: yellow;
+			}
+			#usernameloc {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div>
+			<header>
+				<h1>Month view</h1>
+			</header>
+			<div id="userinfoloc">
+				<div id="userformloc">
+				<form name="userform" onsubmit="return false;" action="#">
+					Username: <input type="text" name="user" onkeyup='if (event.keyCode == 13) { loginUser(); }' value="" />
+					<input type="button" value="Login" onclick="loginUser();" />
+				</form>
+				</div>
+			<div id="usernameloc">
+				Username: <span id="username"></span>
+
+				<input type="button" value="Logout" onclick="logoutUser();" />
+			</div>
+			</div>
+			
+			<div>
+				<P>Calendar description: {{ descstring }}</P>
+				
+				<form name="mainform" onsubmit="return false;" action="#">
+					<div><a href="{% url monthly_view calendar_id %}{{ prev_month }}">Previous month</a>
+					<a href="{% url monthly_view calendar_id %}">Now</a>
+					<a href="{% url monthly_view calendar_id %}{{ next_month }}">Next month</a></div>
+					Year: {{ year }}
+					Month: {{ month }}
+					<div id="monthdata">
+						{{ month_table|safe }}
+					</div>
+					<div id="monthseenform">
+						I have filled out this month's info:
+						{% if month_seen %}
+						<input type="checkbox" onchange="thisMonthSeen();" name="month_seen" checked>
+						{% else %}
+						<input type="checkbox" onchange="thisMonthSeen();" name="month_seen">
+						{% endif %}
+					</div>
+					<div id="monthseendata_outer">
+						People who have finished filling data for this month:<br>
+						<span id="monthseendata">
+						{{ month_seen_by|safe }}
+						</span>
+					</div>
+				</form>
+			</div>
+		</div>
+        <script>
+            var _gaq=[['_setAccount','UA-37644492-1'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+	</body>
+</html>
